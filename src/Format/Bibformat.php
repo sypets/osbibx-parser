@@ -283,26 +283,10 @@ class Bibformat extends AbstractFormat
         $uc = $stylePath . strtolower($style) . '/' . strtolower($style) . '.xml';
         $lc = $stylePath . strtolower($style) . '/' . strtoupper($style) . '.xml';
         $styleFile = file_exists($uc) ? $uc : $lc;
-        if (!$fh = fopen($styleFile, 'r')) {
-            return [
-                'info' => [],
-                'citation' => [],
-                'footnote' => [],
-                'common' => [],
-                'types' => [],
-            ];
-        }
+
         $parseXML = new Parsexml();
-        list($info, $citation, $footnote, $common, $types) = $parseXML->extractEntries($fh);
-        fclose($fh);
-        // return array($info, $citation, $footnote, $common, $types);
-        return [
-            'info' => $info ?? [],
-            'citation' => $citation ?? [],
-            'footnote' => $footnote ?? [],
-            'common' => $common ?? [],
-            'types' => $types ?? [],
-        ];
+        $result = $parseXML->extractEntries($styleFile);
+        return $result;
     }
 
     /**

@@ -211,12 +211,13 @@ class Adminstyle
         $dir = strtolower($this->vars['editStyleFile']);
         $fileName = $this->vars['editStyleFile'] . '.xml';
         if ($fh = fopen($this->styleDir . '/' . $dir . '/' . $fileName, 'r')) {
-            list($info, $citation, $footnote, $common, $types) = $parseXML->extractEntries($fh);
+            // list($info, $citation, $footnote, $common, $types)
+            $result = $parseXML->extractEntries($fh);
             if (!$copy) {
                 $this->session->setVar('style_shortName', $this->vars['editStyleFile']);
-                $this->session->setVar('style_longName', base64_encode($info['description']));
+                $this->session->setVar('style_longName', base64_encode($result['info']['description']));
             }
-            foreach ($citation as $array) {
+            foreach ($result['citation'] as $array) {
                 if (array_key_exists('_NAME', $array) && array_key_exists('_DATA', $array)) {
                     $this->session->setVar(
                         'cite_' . $array['_NAME'],
@@ -224,7 +225,7 @@ class Adminstyle
                     );
                 }
             }
-            $this->arrayToTemplate($footnote, true);
+            $this->arrayToTemplate($result['footnote'], true);
             foreach ($resourceTypes as $type) {
                 $type = 'footnote_' . $type;
                 $sessionKey = $type . 'Template';
@@ -233,7 +234,7 @@ class Adminstyle
                 }
                 unset($this->$type);
             }
-            foreach ($common as $array) {
+            foreach ($result['common'] as $array) {
                 if (array_key_exists('_NAME', $array) && array_key_exists('_DATA', $array)) {
                     $this->session->setVar(
                         'style_' . $array['_NAME'],
@@ -241,7 +242,7 @@ class Adminstyle
                     );
                 }
             }
-            $this->arrayToTemplate($types);
+            $this->arrayToTemplate($result['types']);
             foreach ($resourceTypes as $type) {
                 $sessionKey = 'style_' . $type;
                 if (!empty($this->$type)) {

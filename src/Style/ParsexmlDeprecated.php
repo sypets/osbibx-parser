@@ -23,6 +23,7 @@ http://bibliophile.sourceforge.net
 
 /**
  * Parse XML style information
+ * @deprecated
  */
 class Parsexml
 {
@@ -51,33 +52,16 @@ class Parsexml
 
     /**
      * This method starts the whole process
+     * @param resource|bool $fh
+     *
+     * @todo return combined array like in $this->loadStyle()
      */
-    public function extractEntries(string $styleFile): array
+    public function extractEntries($fh): array
     {
-        if (!file_exists($styleFile)) {
-            return [
-                'info' =>  [],
-                'citation' =>  [],
-                'footnote' =>  [],
-                'common' =>  [],
-                'types' => [],
-            ];
-        }
         $this->entries = [];
         $info = [];
         $types = [];
 
-        $stream = fopen($styleFile, 'r');
-        $parser = xml_parser_create();
-        // set up the handlers here
-        while (($data = fread($stream, 16384))) {
-            xml_parse($parser, $data); // parse the current chunk
-        }
-        xml_parse($parser, '', true); // finalize parsing
-        xml_parser_free($parser);
-        fclose($stream);
-
-        /*
         while (!feof($fh)) {
             $line = fgets($fh);
             if (!$line) {
@@ -87,7 +71,6 @@ class Parsexml
                 $this->getEntry($startEntry[1]);
             }
         }
-        */
 
         $info['name'] = $this->entries[0]['_ELEMENTS'][0]['_ELEMENTS'][0]['_DATA'];
         $info['description'] = $this->entries[0]['_ELEMENTS'][0]['_ELEMENTS'][1]['_DATA'];
@@ -120,13 +103,8 @@ class Parsexml
                 $types[] = $array;
             }
         }
-        return [
-            'info' => $info ?? [],
-            'citation' => $citation ?? [],
-            'footnote' => $footnote ?? [],
-            'common' => $common ?? [],
-            'types' => $types ?? [],
-        ];
+        // todo: change to ['info' => $info etc.
+        return [$info, $citation, $footnote, $common, $types];
     }
 
     public function parse(string $xmlString='')

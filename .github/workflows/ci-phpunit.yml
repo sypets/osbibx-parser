@@ -1,5 +1,6 @@
 # users GitHub php-actions:
 # - https://github.com/php-actions/composer
+# - https://github.com/php-actions/phpunit
 
 name: static CI
 
@@ -18,6 +19,12 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       - uses: php-actions/composer@v6
+
+      - name: PHPUnit tests
+          uses: php-actions/phpunit@v3
+          with:
+            configuration: "build/phpunit.xml"
+            memory_limit: "256M"
 
       - name: "composer validate"
         run: composer validate

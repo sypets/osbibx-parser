@@ -256,9 +256,9 @@ class Citeformat extends AbstractFormat
             return [false, false, false, false];
         }
         $parseXML = new Parsexml();
-        list($info, $citation, $common, $types) = $parseXML->extractEntries($fh);
+        $result = $parseXML->extractEntries($fh);
         fclose($fh);
-        return [$info, $citation, $common, $types];
+        return $result;
     }
 
     /**
