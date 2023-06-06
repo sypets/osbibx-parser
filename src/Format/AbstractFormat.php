@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 namespace Sypets\OsbibxParser\Format;
 
@@ -28,7 +29,7 @@ abstract class AbstractFormat implements FormatInterface
         $this->patterns = '';
     }
 
-    public function getPatternHighlight():string
+    public function getPatternHighlight(): string
     {
         return $this->patternHighlight;
     }
@@ -62,5 +63,4 @@ abstract class AbstractFormat implements FormatInterface
     {
         return $this->wikindx;
     }
-
 }

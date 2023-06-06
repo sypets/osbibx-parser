@@ -21,12 +21,10 @@ http://bibliophile.sourceforge.net
  * @author Mark Grimshaw
  *
  * $Header: /cvsroot/bibliophile/OSBib/create/index.php,v 1.2 2005/06/25 02:57:34 sirfragalot Exp $
- *
  */
 
 // Path to where the XML style files are kept.
-define("OSBIB_STYLE_DIR", "../styles/bibliography");
-
+define('OSBIB_STYLE_DIR', '../styles/bibliography');
 
 /**
 * Initialise
@@ -38,62 +36,40 @@ $vars = $init->getVars();
 // start the session
 $init->startSession();
 
-if(!$vars)
-{
+if (!$vars) {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('display');
-}
-else if($vars["action"] == 'adminStyleAddInit')
-{
+} elseif ($vars['action'] == 'adminStyleAddInit') {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('addInit');
-}
-else if($vars["action"] == 'adminStyleAdd')
-{
+} elseif ($vars['action'] == 'adminStyleAdd') {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('add');
-}
-else if($vars["action"] == 'adminStyleEditInit')
-{
+} elseif ($vars['action'] == 'adminStyleEditInit') {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('editInit');
-}
-else if($vars["action"] == 'adminStyleEditDisplay')
-{
+} elseif ($vars['action'] == 'adminStyleEditDisplay') {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('editDisplay');
-}
-else if($vars["action"] == 'adminStyleEdit')
-{
+} elseif ($vars['action'] == 'adminStyleEdit') {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('edit');
-}
-else if($vars["action"] == 'adminStyleCopyInit')
-{
+} elseif ($vars['action'] == 'adminStyleCopyInit') {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('copyInit');
-}
-else if($vars["action"] == 'adminStyleCopyDisplay')
-{
+} elseif ($vars['action'] == 'adminStyleCopyDisplay') {
     $admin = new Adminstyle($vars);
     $pString = $admin->gateKeep('copyDisplay');
-}
-
-else if($vars["action"] == 'previewStyle')
-{
+} elseif ($vars['action'] == 'previewStyle') {
     $preview = new Previewstyle($vars);
     $pString = $preview->display();
     new Closepopup($pString);
-}
-
-else if($vars["action"] == 'help')
-{
+} elseif ($vars['action'] == 'help') {
     $help = new Helpstyle();
     $pString = $help->display();
-    new Close($pString, FALSE);
-}
-else {
-    $pString = $errors->text("inputError", "invalid");
+    new Close($pString, false);
+} else {
+    $pString = $errors->text('inputError', 'invalid');
 }
 
 /**
@@ -101,5 +77,3 @@ else {
  * prints the HTTP header, body and flushes the print buffer.
 */
 new Close($pString);
-
-

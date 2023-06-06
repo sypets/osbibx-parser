@@ -1,7 +1,10 @@
 <?php
+
 declare(strict_types=1);
 namespace Sypets\OsbibxParser\Create;
+
 use Sypets\OsbibxParser\Utf8;
+
 /********************************
 OSBib:
 A collection of PHP classes to create and manage bibliographic formatting for OS bibliography software

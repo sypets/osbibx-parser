@@ -1,6 +1,8 @@
 <?php
+
 declare(strict_types=1);
 namespace Sypets\OsbibxParser\Parse;
+
 /*
 Released through http://bibliophile.sourceforge.net under the GPL licence.
 Do whatever you like with this -- some credit to the author(s) would be appreciated.

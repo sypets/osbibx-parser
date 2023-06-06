@@ -1,5 +1,7 @@
 <?php
+
 namespace Sypets\OsbibxParser\Style;
+
 /********************************
 OSBib:
 A collection of PHP classes to manage bibliographic formatting for OS bibliography software
@@ -324,7 +326,7 @@ class Stylemapbibtex extends AbstractStyleMap
         $this->thesis['year'] = 'awardYear';
         $this->thesis['creator1'] = 'author';
         $this->thesis[] = 'label'; // 'thesis', 'dissertation'
-// 'type' is special and used in Bibformat.php
+        // 'type' is special and used in Bibformat.php
         $this->thesis['type'] = 'type'; // 'Master's', 'PhD', 'Doctoral', 'Diploma' etc.
         $this->thesis['institution'] = 'institution';
         $this->thesis['address'] = 'institutionLocation';

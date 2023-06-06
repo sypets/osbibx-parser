@@ -1,7 +1,8 @@
 <?php
+
 declare(strict_types=1);
 namespace Sypets\OsbibxParser\format;
-use Sypets\OsbibxParser\format\Testosbib;
+
 use Sypets\OsbibxParser\Style\Loadstyle;
 
 /********************************

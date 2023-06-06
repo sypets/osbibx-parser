@@ -1,6 +1,8 @@
 <?php
+
 declare(strict_types=1);
 namespace Sypets\OsbibxParser\Format;
+
 use Sypets\OsbibxParser\Parse\Parsecreators;
 use Sypets\OsbibxParser\Parse\Parsemonth;
 use Sypets\OsbibxParser\Parse\Parsepage;
@@ -9,6 +11,7 @@ use Sypets\OsbibxParser\Style\Stylemap;
 use Sypets\OsbibxParser\Style\Stylemapbibtex;
 use Sypets\OsbibxParser\Style\StyleMapInterface;
 use Sypets\OsbibxParser\Utf8;
+
 /**
 OSBib:
 A collection of PHP classes to create and manage bibliographic formatting for OS bibliography software
@@ -37,7 +40,6 @@ class Bibformat extends AbstractFormat
     protected bool $dateMonthDay = false;
     protected bool $dateMonthNoDay = false;
     protected bool $pages_plural = false;
-
 
     /**
      *  Convert the bibTeX special characters to produce utf8
@@ -188,7 +190,6 @@ class Bibformat extends AbstractFormat
     {
         $this->citationFootnote = $citationFootnote;
     }
-
 
     /**
      * If cleanEntry is true, convert BibTeX (and LaTeX) special characters to UTF-8

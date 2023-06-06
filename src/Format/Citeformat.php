@@ -1,8 +1,10 @@
 <?php
+
 declare(strict_types=1);
 namespace Sypets\OsbibxParser\Format;
-use Sypets\OsbibxParser\Utf8;
+
 use Sypets\OsbibxParser\Style\Stylemap;
+use Sypets\OsbibxParser\Utf8;
 
 /**
 OSBib:
