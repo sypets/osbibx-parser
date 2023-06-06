@@ -10,14 +10,34 @@ abstract class AbstractFormat implements FormatInterface
     /** @todo make protected */
     public string $output = '';
 
-    protected bool $wikindx = false;
+    protected ?Utf8 $utf8 = null;
 
+    /** @todo specify datatypes */
+    protected array $style = [];
+    protected array $item = [];
+    protected bool $wikindx = false;
     protected string $patternHighlight = '';
 
     /**
      * @todo is effectively not really used, remove this property and related methods
      */
     protected string $patterns = '';
+
+    /**
+     * Is not called getStyle() because this function already exists. Has been deprecated and renamed
+     * to loadStyles(). We can rename this function later.
+     *
+     * @return array
+     */
+    public function getStyleArray(): array
+    {
+        return $this->style;
+    }
+
+    public function hasStyle(string $id): bool
+    {
+        return (bool)($this->style[$id] ?? false);
+    }
 
     public function getPatterns(): string
     {

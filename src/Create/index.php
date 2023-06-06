@@ -24,7 +24,7 @@ http://bibliophile.sourceforge.net
  */
 
 // Path to where the XML style files are kept.
-define('OSBIB_STYLE_DIR', '../styles/bibliography');
+$styleDir = '../styles/bibliography';
 
 /**
 * Initialise
@@ -37,31 +37,31 @@ $vars = $init->getVars();
 $init->startSession();
 
 if (!$vars) {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('display');
 } elseif ($vars['action'] == 'adminStyleAddInit') {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('addInit');
 } elseif ($vars['action'] == 'adminStyleAdd') {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('add');
 } elseif ($vars['action'] == 'adminStyleEditInit') {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('editInit');
 } elseif ($vars['action'] == 'adminStyleEditDisplay') {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('editDisplay');
 } elseif ($vars['action'] == 'adminStyleEdit') {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('edit');
 } elseif ($vars['action'] == 'adminStyleCopyInit') {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('copyInit');
 } elseif ($vars['action'] == 'adminStyleCopyDisplay') {
-    $admin = new Adminstyle($vars);
+    $admin = new Adminstyle($vars, $styleDir);
     $pString = $admin->gateKeep('copyDisplay');
 } elseif ($vars['action'] == 'previewStyle') {
-    $preview = new Previewstyle($vars);
+    $preview = new Previewstyle($vars, $styleDir);
     $pString = $preview->display();
     new Closepopup($pString);
 } elseif ($vars['action'] == 'help') {

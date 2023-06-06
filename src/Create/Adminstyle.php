@@ -25,13 +25,9 @@ Mark Grimshaw 2005
 http://bibliophile.sourceforge.net
 ********************************/
 
-/*****
-* Adminstyle class.
-*
+/**
 * Administration of citation bibliographic styles
-*
-* $Header: /cvsroot/bibliophile/OSBib/create/Adminstyle.php,v 1.10 2005/11/14 06:38:15 sirfragalot Exp $
-*****/
+*/
 class Adminstyle
 {
     /**
@@ -57,8 +53,9 @@ class Adminstyle
     protected ?Stylemap $map = null;
     protected ?Utf8 $utf8 = null;
     protected ?Table $table = null;
+    protected string $styleDir;
 
-    public function __construct(array $vars)
+    public function __construct(array $vars, string $styleDir = '../styles/bibliography')
     {
         $this->vars = $vars;
         $this->session = new Session();
@@ -68,7 +65,8 @@ class Adminstyle
         $this->misc = new Misc();
         $this->form = new Form();
         $this->style = new Loadstyle();
-        $this->styles = $this->style->loadDir(OSBIB_STYLE_DIR);
+        $this->styleDir = $styleDir;
+        $this->styles = $this->style->loadDir($styleDir);
         $this->creators = ['creator1', 'creator2', 'creator3', 'creator4', 'creator5'];
     }
 
@@ -149,7 +147,7 @@ class Adminstyle
         }
         $this->writeFile();
         $pString = $this->success->text('style', ' ' . $this->messages->text('misc', 'added') . ' ');
-        $this->styles = $this->style->loadDir(OSBIB_STYLE_DIR);
+        $this->styles = $this->style->loadDir($this->styleDir);
         return $this->display($pString);
     }
 
@@ -212,7 +210,7 @@ class Adminstyle
         $this->session->setVar('editStyleFile', $this->vars['editStyleFile']);
         $dir = strtolower($this->vars['editStyleFile']);
         $fileName = $this->vars['editStyleFile'] . '.xml';
-        if ($fh = fopen(OSBIB_STYLE_DIR . '/' . $dir . '/' . $fileName, 'r')) {
+        if ($fh = fopen($this->styleDir . '/' . $dir . '/' . $fileName, 'r')) {
             list($info, $citation, $footnote, $common, $types) = $parseXML->extractEntries($fh);
             if (!$copy) {
                 $this->session->setVar('style_shortName', $this->vars['editStyleFile']);
@@ -448,7 +446,7 @@ class Adminstyle
         if ($error = $this->validateInput('edit')) {
             $this->badInput($error, 'editDisplay');
         }
-        $dirName = OSBIB_STYLE_DIR . '/' . strtolower(trim($this->vars['styleShortName']));
+        $dirName = $this->styleDir . '/' . strtolower(trim($this->vars['styleShortName']));
         $fileName = $dirName . '/' . strtoupper(trim($this->vars['styleShortName'])) . '.xml';
         $this->writeFile($fileName);
         $pString = $this->success->text('style', ' ' . $this->messages->text('misc', 'edited') . ' ');
@@ -1896,7 +1894,7 @@ class Adminstyle
         $fileString .= '</style>';
         if (!$fileName) { // called from add()
             // Create folder with lowercase styleShortName
-            $dirName = OSBIB_STYLE_DIR . '/' . strtolower(trim($this->vars['styleShortName']));
+            $dirName = $this->styleDir . '/' . strtolower(trim($this->vars['styleShortName']));
             if (!mkdir($dirName)) {
                 $this->badInput($error = $this->errors->text('file', 'folder'), $this->errorDisplay);
             }

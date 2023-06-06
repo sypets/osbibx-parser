@@ -4,23 +4,23 @@ declare(strict_types=1);
 namespace Sypets\OsbibxParser\Format;
 
 /**********************************************************************************
-WIKINDX: Bibliographic Management system.
-Copyright (C)
-
-This program is free software; you can redistribute it and/or modify it under the terms
-of the GNU General Public License as published by the Free Software Foundation; either
-version 2 of the License, or (at your option) any later version.
-
-This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-See the GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License along with this program;
-if not, write to the
-Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
-
-The WIKINDX Team 2005
-sirfragalot@users.sourceforge.net
+* WIKINDX: Bibliographic Management system.
+* Copyright (C)
+ *
+* This program is free software; you can redistribute it and/or modify it under the terms
+* of the GNU General Public License as published by the Free Software Foundation; either
+* version 2 of the License, or (at your option) any later version.
+ *
+* This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+* without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+* See the GNU General Public License for more details.
+ *
+* You should have received a copy of the GNU General Public License along with this program;
+* if not, write to the
+* Free Software Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+ *
+* The WIKINDX Team 2005
+* sirfragalot@users.sourceforge.net
 **********************************************************************************/
 
 /**
@@ -54,7 +54,7 @@ class Citestyle
     protected array $pageStart = [];
     protected array $pageEnd = [];
 
-    protected ?CITEFORMAT $citeformat = null;
+    protected ?Citeformat $citeformat = null;
     /** we do not really now the type here, an unknown class Session is included  */
     protected ?SESSION $session = null;
 

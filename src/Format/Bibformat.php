@@ -72,10 +72,8 @@ class Bibformat extends AbstractFormat
 
     /** @var string|object|null  */
     protected $wikindxLanguageClass;
-    protected array $style = [];
     protected array $shortMonth = [];
     protected array $longMonth = [];
-    protected array $item = [];
     protected array $dateArray = [];
     protected array $footnoteStyle = [];
     protected array $fallback = [];
@@ -92,7 +90,6 @@ class Bibformat extends AbstractFormat
     protected $editorSwitch = false;
 
     protected ?StyleMapInterface $styleMap = null;
-    protected ?Utf8 $utf8 = null;
     protected ?Bibtexcofig $config = null;
     protected ?Parsestyle $parseStyle = null;
 

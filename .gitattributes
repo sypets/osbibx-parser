@@ -2,9 +2,8 @@
 /.gitattributes export-ignore
 /.github export-ignore
 /.gitignore export-ignore
+/.gitlab-ci.yml export-ignore
 /.stylelintrc export-ignore
 /build export-ignore
-/Gruntfile.js export-ignore
-/package.json export-ignore
 /phpstan.neon export-ignore
 /tests/ export-ignore

@@ -69,7 +69,7 @@ class Testosbib
         //include_once(__DIR__ . '/Citeformat.php');
         // Pass the bibstyle object to Citeformat() as the first argument.
         // The second argument is the name of the method within the bibstyle object that starts the formatting of a bibliographic item.
-        $this->citeformat = new CITEFORMAT($this, 'processBib', '../');
+        $this->citeformat = new Citeformat($this, 'processBib', '../');
         $this->bibformat->output = $this->citeformat->output = 'html'; // output format (default)
         list($info, $citation, $footnote, $styleCommon, $styleTypes) =
             $this->bibformat->loadStyle('../styles/bibliography/', $this->style);
@@ -116,7 +116,7 @@ class Testosbib
         // All other database resource fields that do not require special formatting/conversion.
         $this->bibformat->addAllOtherItems($row);
         // For citation formatting later on, get the placeholder to deal with ambiguous in-text citations.  Must be keyed by unique resource identifier.
-        $this->citeformat->bibliographyIds[$id] = false;
+        $this->citeformat->setBibliographyId($id, false);
         // Return the result of the bibliographic formatting removing any extraneous braces
         return preg_replace('/{(.*)}/U', '$1', $this->bibformat->map());
     }
@@ -139,9 +139,9 @@ class Testosbib
         foreach ($match[1] as $value) {
             $this->matches[1][] = $value;
         }
-        $this->citeformat->count = 0;
+        $this->citeformat->resetCount();
         foreach ($match[2] as $index => $value) {
-            ++$this->citeformat->count;
+            $this->citeformat->incrementCount();
             if ($id = $this->parseCiteTag($index, $value)) {
                 $this->citeIds[] = $id;
             }
@@ -167,15 +167,15 @@ class Testosbib
         * N.B. the preg_match_all() above does not capture any text after the final citation so this must be handled manually and appended to any final output -
         * this is $this->tailText above.
         */
-        $this->citeformat->count = 0;
+        $this->citeformat->resetCount();
         $citeIndex = 0;
         while (!empty($this->matches[1])) {
             $this->citeformat->item = []; // must be reset each time.
             $id = $this->citeIds[$citeIndex];
             ++$citeIndex;
-            ++$this->citeformat->count;
+            $this->citeformat->incrementCount();
             $text = array_shift($this->matches[1]);
-            $this->citeformat->items[$this->citeformat->count]['id'] = $id;
+            $this->citeformat->items[$this->citeformat->getCount()]['id'] = $id;
             $this->createPrePostText(array_shift($this->preText), array_shift($this->postText));
             // For each element of $bibliography, process title, creator names etc.
             if (array_key_exists($id, $this->row)) {
@@ -186,8 +186,8 @@ class Testosbib
             // need to set this manually if this is not the case for your system.  'type' is used in Citeformat::prependAppend() to add any special strings to the citation within
             // the text (e.g. the XML style file might state that 'Personal communication: ' needs to be appended to any in-text citations for resources of type 'email'.
             // Citeformat::prependAppend() will map 'type' against the $types array in Stylemap as used in Bibformat.
-            $this->citeformat->items[$this->citeformat->count]['type'] = $this->rowSingle['type'];
-            $this->citeformat->items[$this->citeformat->count]['text'] = $text;
+            $this->citeformat->items[$this->citeformat->getCount()]['type'] = $this->rowSingle['type'];
+            $this->citeformat->items[$this->citeformat->getCount()]['text'] = $text;
         }
         $pString = $this->citeformat->process() . $this->tailText;
         // Endnote-style citations so add the endnotes bibliography
@@ -279,7 +279,7 @@ class Testosbib
                 continue;
             }
             // If we're disambiguating citations by adding a letter after the year, we need to insert the yearLetter into $row before formatting the bibliography.
-            if ($this->citeformat->style['ambiguous'] &&
+            if ($this->citeformat->hasStyle('ambiguous') &&
                 array_key_exists($id, $this->citeformat->yearsDisambiguated)) {
                 $row['year1'] = $this->citeformat->yearsDisambiguated[$id];
             }

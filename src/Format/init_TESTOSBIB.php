@@ -3,6 +3,7 @@
 declare(strict_types=1);
 namespace Sypets\OsbibxParser\format;
 
+use Sypets\OsbibxParser\Format\Testosbib;
 use Sypets\OsbibxParser\Style\Loadstyle;
 
 /********************************

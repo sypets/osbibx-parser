@@ -4,7 +4,6 @@ declare(strict_types=1);
 namespace Sypets\OsbibxParser\Format;
 
 use Sypets\OsbibxParser\Style\Stylemap;
-use Sypets\OsbibxParser\Utf8;
 
 /**
 OSBib:
@@ -94,12 +93,10 @@ class Citeformat extends AbstractFormat
     protected array $intextBibliography = [];
     protected array $creatorSurnames = [];
     protected array $items = [];
-    protected array $style = [];
     protected array $titles = [];
     protected array $years = [];
     protected array $templateEndnote = [];
     protected array $pages = [];
-    protected array $item = [];
     protected array $template = [];
     protected array $yearsDisambiguated = [];
     protected array $bibliographyIds = [];
@@ -117,7 +114,6 @@ class Citeformat extends AbstractFormat
     protected ?AbstractWikIndxLanguageClass $wikindxLanguageClass = null;
     protected ?Bibstyle $bibStyle = null;
     protected ?Exportfilter $export = null;
-    protected ?Utf8 $utf8 = null;
     protected ?Misc $misc = null;
     protected ?Parsestyle $parseStyle = null;
     protected ?STYLEMAP $styleMap = null;
@@ -206,15 +202,14 @@ class Citeformat extends AbstractFormat
         $this->count = $count;
     }
 
-    /**
-     * Is not called getStyle() because this function already exists. Has been deprecated and renamed
-     * to loadStyles(). We can rename this function later.
-     *
-     * @return array
-     */
-    public function getStyleArray(): array
+    public function resetCount(): void
     {
-        return $this->style;
+        $this->count = 0;
+    }
+
+    public function incrementCount(): void
+    {
+        $this->count++;
     }
 
     public function getBibliographyIds(): array
@@ -2238,5 +2233,10 @@ class Citeformat extends AbstractFormat
         // If there is no equivalent possessive form in another language, set these to FALSE.
         $this->possessive1 = "'s";
         $this->possessive2 = "'";
+    }
+
+    public function setBibliographyId(string $id, $value): void
+    {
+        $this->bibliographyIds[$id] = $value;
     }
 }
