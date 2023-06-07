@@ -1,0 +1,37 @@
+{
+	"name": "sypets/osbibx-parser",
+	"description": "Bibtex PHP library, originally based on OSBiB by Mark Grimshaw",
+	"type": "library",
+	"license": "GPL-2.0-or-later",
+	"autoload": {
+		"psr-4": {
+			"Sypets\\OsbibxParser\\": "src/",
+			"Sypets\\OsbibxParser\\Tests\\": "tests/"
+		}
+	},
+	"authors": [
+		{
+			"name": "Sybille Peters",
+			"email": "sypets@gmx.de"
+		}
+	],
+	"require": {
+		"php": "^8.1"
+	},
+	"require-dev": {
+		"friendsofphp/php-cs-fixer": "^3.17",
+		"phpstan/phpstan": "^1.10",
+		"phpunit/phpunit": "^10"
+	},
+	"scripts": {
+		"cgl:check": [
+			"@php vendor/bin/php-cs-fixer fix --dry-run -v --config ./build/php-cs-fixer.php src"
+		],
+		"cgl:fix": [
+			"@php vendor/bin/php-cs-fixer fix -v --config ./build/php-cs-fixer.php src"
+		],
+		"phpstan": [
+			"@php vendor/bin/phpstan analyse --no-progress --no-interaction --memory-limit 4G -c build/phpstan.neon"
+		]
+	}
+}
