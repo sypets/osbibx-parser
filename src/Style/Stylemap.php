@@ -48,7 +48,6 @@ class Stylemap extends AbstractStyleMap
     */
     public function loadMap()
     {
-        $this->citation = self::DEFAULT_CITATION;
         $this->citation['ID'] = 'ID';
 
         /**
@@ -99,13 +98,7 @@ class Stylemap extends AbstractStyleMap
             'chart' => 'chart',
             'miscellaneous' => 'miscellaneous',
         ];
-        /**
-        * Basic array of elements common to all types - change the key to map the database field that stores that value.
-        */
-        $this->basic = [
-                    'title' => 'title',
-                    'year1' => 'publicationYear',
-            ];
+
         /**
         * Creator mapping.  OSBib uses 'creator1' .. 'creator5' for internally managing creator names such as
         * author, editor, series editor, translator, reviser, artist, inventor, composer etc.  The associative

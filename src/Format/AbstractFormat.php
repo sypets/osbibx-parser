@@ -15,6 +15,10 @@ abstract class AbstractFormat implements FormatInterface
     /** @todo specify datatypes */
     protected array $style = [];
     protected array $item = [];
+    /**
+     * @deprecated
+     * @todo remove Wikindx specific functionality
+     */
     protected bool $wikindx = false;
     protected string $patternHighlight = '';
 
@@ -79,6 +83,10 @@ abstract class AbstractFormat implements FormatInterface
         $this->wikindx = $wikindx;
     }
 
+    /**
+     * @deprecated
+     * @todo remove Wikindx specific functionality
+     */
     public function getWikindx(): bool
     {
         return $this->wikindx;

@@ -111,32 +111,7 @@ class Stylemapbibtex extends AbstractStyleMap
     */
     public function loadMap()
     {
-        /**
-        * What fields are available to the in-text citation template? This array should NOT be changed.
-        */
-        $this->citation = [
-                    'creator' => 'creator',
-                    'title' => 'title',
-                    'year' => 'year',
-                    'pages' => 'pages',
-                ];
-        /**
-        * What fields are available to the in-text citation template for endnote-style citations? This array should NOT be changed.
-        */
-        $this->citationEndnoteInText = [
-                    'id' => 'id',
-                    'pages' => 'pages',
-                ];
-        /**
-        * What fields are available to the endnote citation template for endnote-style citations? This array should NOT be changed.
-        */
-        $this->citationEndnote = [
-                    'citation' => 'citation',
-                    'creator' => 'creator',
-                    'title' => 'title',
-                    'year' => 'year',
-                    'pages' => 'pages',
-                ];
+
         /**
         * NB NB NB NB NB NB NB NB NB NB NB
         *
@@ -185,13 +160,7 @@ class Stylemapbibtex extends AbstractStyleMap
             'chart' => false,
             'miscellaneous'  => 'misc',
         ];
-        /**
-        * Basic array of elements common to all types - change the key to map the database field that stores that value.
-        */
-        $this->basic = [
-                    'title'  => 'title',
-                    'year'  => 'publicationYear',
-        ];
+
         /**
         * Creator mapping.  OSBib uses 'creator1' .. 'creator5' for internally managing creator names such as
         * author, editor, series editor, translator, reviser, artist, inventor, composer etc.  The associative

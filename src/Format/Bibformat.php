@@ -6,7 +6,8 @@ namespace Sypets\OsbibxParser\Format;
 use Sypets\OsbibxParser\Parse\Parsecreators;
 use Sypets\OsbibxParser\Parse\Parsemonth;
 use Sypets\OsbibxParser\Parse\Parsepage;
-use Sypets\OsbibxParser\Style\Parsexml;
+use Sypets\OsbibxParser\Style\ParseStyle\ParseResultInterface;
+use Sypets\OsbibxParser\Style\ParseStyle\Xml\Parsexml;
 use Sypets\OsbibxParser\Style\Stylemap;
 use Sypets\OsbibxParser\Style\Stylemapbibtex;
 use Sypets\OsbibxParser\Style\StyleMapInterface;
@@ -35,6 +36,38 @@ http://bibliophile.sourceforge.net
 */
 class Bibformat extends AbstractFormat
 {
+    // Defaults
+    protected const DATE_LONG_MONTH = [
+        1  => 'January',
+        2  => 'February',
+        3  => 'March',
+        4  => 'April',
+        5  => 'May',
+        6  => 'June',
+        7  => 'July',
+        8  => 'August',
+        9  => 'September',
+        10 => 'October',
+        11 => 'November',
+        12 => 'December',
+    ];
+
+    protected const DATE_SHORT_MONTH = [
+        1  => 'Jan',
+        2  => 'Feb',
+        3  => 'Mar',
+        4  => 'Apr',
+        5  => 'May',
+        6  => 'Jun',
+        7  => 'Jul',
+        8  => 'Aug',
+        9  => 'Sep',
+        10 => 'Oct',
+        11 => 'Nov',
+        12 => 'Dec',
+    ];
+
+
     protected bool $bibtex = false;
     protected bool $preview = false;
     protected bool $dateMonthDay = false;
@@ -46,6 +79,13 @@ class Bibformat extends AbstractFormat
      *  Default: 'FALSE', we assume that the entries are already clean
      */
     protected bool $cleanEntry = false;
+    /**
+     * Is a citation footnote? We have different style in citation footnotes.
+     * Some styles require different templates and formatting of creator names for a citation in a footnote as opposed
+     * to a full bibliography.  Setting this to true
+     * loads a different set of templates and settings for footnotes.
+     * The default false is for full bibliography.
+     */
     protected bool $citationFootnote = false;
 
     /**
@@ -84,8 +124,9 @@ class Bibformat extends AbstractFormat
     protected array $creators = [];
 
     /**
+     *
+     * Switch editor and author positions in the style definition for a book in which there are only editors
      * @var array|bool
-     * @todo uncertain which type is correct, may be accessed with $this->$type
      */
     protected $editorSwitch = false;
 
@@ -273,7 +314,7 @@ class Bibformat extends AbstractFormat
     * @param string $style The requested bibliographic output style.
     * @return array
     */
-    public function loadStyleAsNamedArray(string $stylePath, string $style): array
+    public function loadStyleAsNamedArray(string $stylePath, string $style): ParseResultInterface
     {
         //05/05/2005 G.GARDEY: add a last "/" to $stylePath if not present.
         $stylePath = trim($stylePath);
@@ -283,26 +324,9 @@ class Bibformat extends AbstractFormat
         $uc = $stylePath . strtolower($style) . '/' . strtolower($style) . '.xml';
         $lc = $stylePath . strtolower($style) . '/' . strtoupper($style) . '.xml';
         $styleFile = file_exists($uc) ? $uc : $lc;
-        if (!$fh = fopen($styleFile, 'r')) {
-            return [
-                'info' => [],
-                'citation' => [],
-                'footnote' => [],
-                'common' => [],
-                'types' => [],
-            ];
-        }
+
         $parseXML = new Parsexml();
-        list($info, $citation, $footnote, $common, $types) = $parseXML->extractEntries($fh);
-        fclose($fh);
-        // return array($info, $citation, $footnote, $common, $types);
-        return [
-            'info' => $info ?? [],
-            'citation' => $citation ?? [],
-            'footnote' => $footnote ?? [],
-            'common' => $common ?? [],
-            'types' => $types ?? [],
-        ];
+        return $parseXML->extractEntriesFromFile($styleFile);
     }
 
     /**
@@ -311,19 +335,103 @@ class Bibformat extends AbstractFormat
     * @author Mark Grimshaw
     * @version 1
     *
-    * @param array $common Array of global formatting data
-    * @param array $types Array of style definitions for each resource type
-    * @param array $footnote Array of style definitions for footnote creators
+    *
     */
-    public function getStyle(array $common, array $types, array $footnote = [])
+    public function applyStyles(ParseResultInterface $parseResult): void
     {
+        $common = $parseResult->getCommonArray();
+        $types = $parseResult->getTypesArray();
+        $footnote = $parseResult->getFootnoteArray();
+
+        // @todo do not call commonToArray anymore and use only $this->styleMap to write the style configuration
         $this->commonToArray($common);
+        $this->commonToStyleMap($common, $this->styleMap);
         $this->footnoteToArray($footnote);
         $this->typesToArray($types);
         /**
         * Load localisations etc.
         */
         $this->loadArrays();
+    }
+
+    /**
+     * @todo more this to Parsexml
+     */
+    public function commonToStyleMap(array $common, StyleMapInterface $styleMap): void
+    {
+        foreach ($common as $array) {
+            if (array_key_exists('_NAME', $array) && array_key_exists('_DATA', $array)) {
+                $name = $array['_NAME'];
+                $data = $array['_DATA'];
+
+                switch ($name) {
+                    case 'titleCapitalization':
+                        $styleMap->setTitleCapitalization((bool)$data);
+                        break;
+                    case 'editorSwitch':
+                        $styleMap->setEditorSwitch((bool)$data);
+                        break;
+                    case 'editorSwitchIfYes':
+                        $styleMap->setEditorSwitchIfYes($data);
+                        break;
+                    case 'dateMonthNoDay':
+                        $styleMap->setDateMonthNoDay((bool)$data);
+                        break;
+                    case 'dateMonthNoDayString':
+                        $styleMap->setDateMonthNoDayString($data);
+                        break;
+                    case 'runningTimeFormat':
+                        $styleMap->setRunningTimeFormat((int)$data);
+                        break;
+                    case 'dayFormat':
+                        $styleMap->setDayFormat((int)$data);
+                        break;
+                    case 'monthFormat':
+                        $styleMap->setMonthFormat((int)$data);
+                        break;
+                    case 'dateRangeDelimit1':
+                        $styleMap->setDateRangeDelimit1($data);
+                        break;
+                    case 'dateRangeDelimit2':
+                        $styleMap->setDateRangeDelimit2($data);
+                        break;
+                    case 'dateRangeSameMonth':
+                        $styleMap->setDateRangeSameMonth((bool)$data);
+                        break;
+                    case 'editionFormat':
+                        $styleMap->setEditionFormat((int)$data);
+                        break;
+                    case 'primaryCreatorInitials':
+                        $styleMap->setPrimaryCreatorInitials((bool)$data);
+                        break;
+                    case 'primaryCreatorInitials':
+                        $styleMap->setPrimaryCreatorInitials((bool)$data);
+                        break;
+                    case 'primaryCreatorFirstStyle':
+                        $styleMap->setPrimaryCreatorFirstStyle((bool)$data);
+                        break;
+                    case 'primaryCreatorOtherStyle':
+                        $styleMap->setPrimaryCreatorOtherStyle((bool)$data);
+                        break;
+                    case 'primaryCreatorFirstName':
+                        $styleMap->setPrimaryCreatorFirstName((bool)$data);
+                        break;
+                    case 'otherCreatorFirstStyle':
+                        $styleMap->setOtherCreatorFirstStyle((bool)$data);
+                        break;
+                    case 'otherCreatorOtherStyle':
+                        $styleMap->setOtherCreatorOtherStyle((bool)$data);
+                        break;
+                    case 'otherCreatorInitials':
+                        $styleMap->setOtherCreatorInitials((bool)$data);
+                        break;
+
+                    default:
+                        $styleMap->setCommonValue($name, $data);
+                }
+
+            }
+        }
     }
 
     /**
@@ -337,12 +445,16 @@ class Bibformat extends AbstractFormat
      * @version 1
      *
      * @param array $common nodal array representation of XML data
+     * @todo remove this function, use only commontToStylemap. Set the style in Stylemap, do not use variables in this
+     *   class
      */
     public function commonToArray(array $common): void
     {
         foreach ($common as $array) {
             if (array_key_exists('_NAME', $array) && array_key_exists('_DATA', $array)) {
-                $this->style[$array['_NAME']] = $array['_DATA'];
+                $name = $array['_NAME'];
+                $data = $array['_DATA'];
+                $this->style[$name] = $data;
             }
         }
     }
@@ -499,6 +611,7 @@ class Bibformat extends AbstractFormat
         $this->item = [];
         // Map this system's resource type to OSBib's resource type
         $this->type = array_search($type, $this->styleMap->getTypes());
+        //$this->type = $this->styleMap->mapType($type);
         if ($this->bibtex && array_key_exists('author', $row)) {
             $row['creator1'] = $row['author'];
             unset($row['author']);
@@ -511,13 +624,13 @@ class Bibformat extends AbstractFormat
         * Set any author/editor re-ordering for book and book_article type.
         */
         if (!$this->preview && (($type == 'book') || ($type == 'book_article')) &&
-            ($row['creator2'] ?? false) && !($row['creator1'] ?? false) && $this->style['editorSwitch'] &&
+            ($row['creator2'] ?? false) && !($row['creator1'] ?? false) && $this->styleMap->isEditorSwitch() &&
             array_key_exists('author', $this->$type)) {
             $row['creator1'] = $row['creator2'];
             $row['creator2'] = false;
             $editorArray = $this->parseStyle->parseStringToArray(
                 $type,
-                $this->style['editorSwitchIfYes'],
+                $this->styleMap->getEditorSwitchIfYes(),
                 $this->styleMap
             );
             if (!empty($editorArray) && array_key_exists('editor', $editorArray)) {
@@ -526,11 +639,11 @@ class Bibformat extends AbstractFormat
                 $this->editorSwitch = true;
             }
         }
-        if (($this->style['dateMonthNoDay'] ?? false) && array_key_exists('date', $this->styleMap->getDynamicProperty($type)) &&
-            array_key_exists('dateMonthNoDayString', $this->style) && $this->style['dateMonthNoDayString']) {
+        if ($this->styleMap->isDateMonthNoDay() && array_key_exists('date', $this->styleMap->getDynamicProperty($type)) &&
+            $this->styleMap->hasDateMonthNoDayString()) {
             $this->dateArray = $this->parseStyle->parseStringToArray(
                 $type,
-                $this->style['dateMonthNoDayString'],
+                $this->styleMap->getDateMonthNoDayString(),
                 $this->styleMap,
                 true
             );
@@ -1371,7 +1484,7 @@ class Bibformat extends AbstractFormat
         * '0' == 'Osbib Bibliographic Formatting'
         * '1' == 'Osbib bibliographic formatting'
         */
-        if ($this->style['titleCapitalization']) {
+        if ($this->styleMap->isTitleCapitalization()) {
             // Something here (preg_split probably) interferes with UTF-8 encoding (data is stored in
             // the database as UTF-8 as long as web browser charset == UTF-8).
             // So first decode then encode back to UTF-8 at end.
@@ -1518,7 +1631,7 @@ class Bibformat extends AbstractFormat
         $runningTime = '';
 
         $type = $this->type;
-        if ($this->style['runningTimeFormat'] == 0) { // 3'45"
+        if ($this->styleMap->getRunningTimeFormat() == 0) { // 3'45"
             if (isset($minutes) && $minutes) {
                 if ($minutes < 10) {
                     $minutes = '0' . $minutes;
@@ -1527,7 +1640,7 @@ class Bibformat extends AbstractFormat
             } else {
                 $runningTime = $hours . "'00\"";
             }
-        } elseif ($this->style['runningTimeFormat'] == 1) { // 3:45
+        } elseif ($this->styleMap->getRunningTimeFormat() == 1) { // 3:45
             if (isset($minutes) && $minutes) {
                 if ($minutes < 10) {
                     $minutes = '0' . $minutes;
@@ -1536,7 +1649,7 @@ class Bibformat extends AbstractFormat
             } else {
                 $runningTime = $hours . ':00';
             }
-        } elseif ($this->style['runningTimeFormat'] == 1) { // 3,45
+        } elseif ($this->styleMap->getRunningTimeFormat() == 1) { // 3,45
             if (isset($minutes) && $minutes) {
                 if ($minutes < 10) {
                     $minutes = '0' . $minutes;
@@ -1545,7 +1658,7 @@ class Bibformat extends AbstractFormat
             } else {
                 $runningTime = $hours . ',00';
             }
-        } elseif ($this->style['runningTimeFormat'] == 3) { // 3 hours, 45 minutes
+        } elseif ($this->styleMap->getRunningTimeFormat() == 3) { // 3 hours, 45 minutes
             $hours = ($hours == 1) ? $hours . ' hour' : $hours . ' hours';
             if (isset($minutes) && $minutes) {
                 $minutes = ($minutes == 1) ? $minutes . ' minute' : $minutes . ' minutes';
@@ -1553,7 +1666,7 @@ class Bibformat extends AbstractFormat
             } else {
                 $runningTime = $hours;
             }
-        } elseif ($this->style['runningTimeFormat'] == 4) { // 3 hours and 45 minutes
+        } elseif ($this->styleMap->getRunningTimeFormat() == 4) { // 3 hours and 45 minutes
             $hours = ($hours == 1) ? $hours . ' hour' : $hours . ' hours';
             if (isset($minutes) && $minutes) {
                 $minutes = ($minutes == 1) ? $minutes . ' minute' : $minutes . ' minutes';
@@ -1586,9 +1699,9 @@ class Bibformat extends AbstractFormat
             $this->dateArray[$this->styleMap->getDynamicPropertyArrayElement($type, 'date')];
         }
         if ($startDay !== false) {
-            if ($this->style['dayFormat'] == 1) { // e.g. 10.
+            if ($this->styleMap->getDayFormat() == 1) { // e.g. 10.
                 $startDay .= '.';
-            } elseif ($this->style['dayFormat'] == 2) { // e.g. 10th
+            } elseif ($this->styleMap->getDayFormat() == 2) { // e.g. 10th
                 $startDay = $this->cardinalToOrdinal($startDay, 'dayMonth');
             }
             if (array_key_exists('dayLeadingZero', $this->style) && $oldStartDay < 10) {
@@ -1596,18 +1709,18 @@ class Bibformat extends AbstractFormat
             }
         }
         if ($endDay !== false) {
-            if ($this->style['dayFormat'] == 1) { // e.g. 10.
+            if ($this->styleMap->getDayFormat() == 1) { // e.g. 10.
                 $endDay .= '.';
-            } elseif ($this->style['dayFormat'] == 2) { // e.g. 10th
+            } elseif ($this->styleMap->getDayFormat() == 2) { // e.g. 10th
                 $endDay = $this->cardinalToOrdinal($endDay, 'dayMonth');
             }
             if (array_key_exists('dayLeadingZero', $this->style) && $oldEndDay < 10) {
                 $endDay = '0' . $endDay;
             }
         }
-        if ($this->style['monthFormat'] == 1) { // Full month name
-            $monthArray = $this->longMonth;
-        } elseif ($this->style['monthFormat'] == 2) { // User-defined
+        if ($this->styleMap->getMonthFormat() == 1) { // Full month name
+            $monthArray = self::DATE_LONG_MONTH;
+        } elseif ($this->styleMap->getMonthFormat() == 2) { // User-defined
             for ($i = 1; $i <= 12; $i++) {
                 $monthArray[$i] = $this->style["userMonth_$i"];
             }
@@ -1621,7 +1734,7 @@ class Bibformat extends AbstractFormat
             $endMonth = $monthArray[$endMonth];
         }
         if (!$endMonth) {
-            if ($this->style['dateFormat']) { // Order == Month Day
+            if ($this->styleMap->getDateFormat() !== 0) { // Order == Month Day
                 $startDay = ($startDay === false) ? '' : ' ' . $startDay;
                 $date = $startMonth . $startDay;
             } else { // Order == Day Month
@@ -1629,18 +1742,18 @@ class Bibformat extends AbstractFormat
                 $date = $startDay . $startMonth;
             }
         } else { // date range
-            if (!$startDay) {
-                $delimit = $this->style['dateRangeDelimit2'];
+            if ($startDay) {
+                $delimit = $this->styleMap->getDateRangeDelimit1();
             } else {
-                $delimit = $this->style['dateRangeDelimit1'];
+                $delimit = $this->styleMap->getDateRangeDelimit2();
             }
-            if (($endMonth !== false) && ($startMonth == $endMonth) && ($this->style['dateRangeSameMonth'] == 1)) {
+            if (($endMonth !== false) && ($startMonth == $endMonth) && $this->styleMap->isDateRangeSameMonth()) {
                 $endMonth = false;
                 if (!$endDay) {
                     $delimit = false;
                 }
             }
-            if ($this->style['dateFormat']) { // Order == Month Day
+            if ($this->styleMap->getDateFormat() !== 0) { // Order == Month Day
                 $startDay = ($startDay === false) ? '' : ' ' . $startDay;
                 $startDate = $startMonth . $startDay;
                 if ($endMonth) {
@@ -1677,9 +1790,9 @@ class Bibformat extends AbstractFormat
         $type = $this->type;
         if (!is_numeric($edition)) {
             $edition = $edition;
-        } elseif ($this->style['editionFormat'] == 1) { // 10.
+        } elseif ($$this->styleMap->getEditionFormat() == 1) { // 10.
             $edition .= '.';
-        } elseif ($this->style['editionFormat'] == 2) { // 10th
+        } elseif ($$this->styleMap->getEditionFormat() == 2) { // 10th
             $edition = $this->cardinalToOrdinal($edition, 'edition');
         }
         $this->item[$this->styleMap->getDynamicPropertyArrayElement(
@@ -1736,53 +1849,6 @@ class Bibformat extends AbstractFormat
      */
     public function loadArrays(): void
     {
-        // WIKINDX-specific
-        if ($this->getWikindx()) {
-            $languageDir = $this->style['localisation'];
-            if (!is_dir("languages/$languageDir")) {
-                $languageDir = 'en';
-            }
-            include_once("languages/$languageDir/CONSTANTS.php");
-            $class = 'CONSTANTS_' . $languageDir;
-            $this->wikindxLanguageClass = new $class();
-            if (isset($this->wikindxLanguageClass->titleSubtitleSeparator)
-                && method_exists($this->wikindxLanguageClass, 'monthToLongName')
-                && method_exists($this->wikindxLanguageClass, 'monthToShortName')) {
-                $this->titleSubtitleSeparator = $this->wikindxLanguageClass->titleSubtitleSeparator;
-                $this->longMonth = $this->wikindxLanguageClass->monthToLongName();
-                $this->shortMonth = $this->wikindxLanguageClass->monthToShortName();
-                return;
-            }
-        }
-        // Defaults
-        $this->longMonth = [
-                1  => 'January',
-                2  => 'February',
-                3  => 'March',
-                4  => 'April',
-                5  => 'May',
-                6  => 'June',
-                7  => 'July',
-                8  => 'August',
-                9  => 'September',
-                10 => 'October',
-                11 => 'November',
-                12 => 'December',
-            ];
-        $this->shortMonth = [
-                1  => 'Jan',
-                2  => 'Feb',
-                3  => 'Mar',
-                4  => 'Apr',
-                5  => 'May',
-                6  => 'Jun',
-                7  => 'Jul',
-                8  => 'Aug',
-                9  => 'Sep',
-                10 => 'Oct',
-                11 => 'Nov',
-                12 => 'Dec',
-            ];
         $this->titleSubtitleSeparator = ': ';
     }
 

@@ -13,6 +13,10 @@ interface FormatInterface
     public function getUtf8(): ?Utf8;
     public function setOutput(string $output): void;
     public function getOutput(): string;
+    /**
+     * @deprecated
+     * @todo remove Wikindx specific functionality
+     */
     public function setWikindx(bool $wikindx): void;
     public function getWikindx(): bool;
 }

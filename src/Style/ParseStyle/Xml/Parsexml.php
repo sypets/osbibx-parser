@@ -1,29 +1,40 @@
 <?php
 
 declare(strict_types=1);
-namespace Sypets\OsbibxParser\Style;
+namespace Sypets\OsbibxParser\Style\ParseStyle\Xml;
+
+use Sypets\OsbibxParser\Style\ParseStyle\ParseResult;
+use Sypets\OsbibxParser\Style\ParseStyle\ParseResultInterface;
+use Sypets\OsbibxParser\Style\ParseStyle\Xml\ParseResultRawXml;
 
 /********************************
-OSBib:
-A collection of PHP classes to create and manage bibliographic formatting for OS bibliography software
-using the OSBib standard.
-
-Released through http://bibliophile.sourceforge.net under the GPL licence.
-Do whatever you like with this -- some credit to the author(s) would be appreciated.
-
-The XML parsing is indebted to code by Dante Lorenso at:
-http://www.devarticles.com/c/a/PHP/Converting-XML-Into-a-PHP-Data-Structure/
-
-If you make improvements, please consider contacting the administrators at bibliophile.sourceforge.net
-so that your improvements can be added to the release package.
-
-Mark Grimshaw 2005
-http://bibliophile.sourceforge.net
+* OSBib:
+* A collection of PHP classes to create and manage bibliographic formatting for OS bibliography software
+* using the OSBib standard.
+ *
+* Released through http://bibliophile.sourceforge.net under the GPL licence.
+* Do whatever you like with this -- some credit to the author(s) would be appreciated.
+ *
+* The XML parsing is indebted to code by Dante Lorenso at:
+* http://www.devarticles.com/c/a/PHP/Converting-XML-Into-a-PHP-Data-Structure/
+ *
+* If you make improvements, please consider contacting the administrators at bibliophile.sourceforge.net
+* so that your improvements can be added to the release package.
+ *
+* Mark Grimshaw 2005
+* http://bibliophile.sourceforge.net
 ********************************/
 
+/**
+ * Load style information from XML
+ * @todo !!! this only works if the XML file has no line breaks. Fix this!
+ * @todo define XML schema and use some defaults
+ */
 class Parsexml
 {
+    /** XML parsing result is written to this */
     protected array $nodeStack = [];
+
     /** @var array|bool */
     protected $entries = [];
 
@@ -46,13 +57,24 @@ class Parsexml
         }
     }
 
+    public function extractEntriesFromFile(string $filename): ParseResultInterface
+    {
+        if (!file_exists($filename)) {
+            return new ParseResult();
+        }
+        $fh = fopen($filename, 'r');
+        $entries = $this->extractEntries($fh);
+        fclose($fh);
+        return $entries;
+    }
+
     /**
      * This method starts the whole process
      * @param resource|bool $fh
      *
-     * @todo return combined array like in $this->loadStyle()
+     * @todo make this protected, use extractEntriesFromFile
      */
-    public function extractEntries($fh): array
+    public function extractEntries($fh): ParseResultInterface
     {
         $this->entries = [];
         $info = [];
@@ -101,8 +123,15 @@ class Parsexml
                 $types[] = $array;
             }
         }
-        // todo: change to ['info' => $info etc.
-        return [$info, $citation, $footnote, $common, $types];
+        $parseResult = new ParseResultRawXml();
+        $parseResult->loadRawValues([
+            'info' => $info,
+            'citation' => $citation,
+            'footnote' => $footnote,
+            'common' => $common,
+            'types' => $types
+        ]);
+        return $parseResult;
     }
 
     public function parse(string $xmlString='')

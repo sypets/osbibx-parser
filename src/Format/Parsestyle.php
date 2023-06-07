@@ -5,7 +5,7 @@ namespace Sypets\OsbibxParser\Format;
 
 use Sypets\OsbibxParser\Style\Stylemap;
 
-/********************************
+/*
 OSBib:
 A collection of PHP classes to create and manage bibliographic formatting for OS bibliography software
 using the OSBib standard.
@@ -18,8 +18,11 @@ so that your improvements can be added to the release package.
 
 Mark Grimshaw 2005
 http://bibliophile.sourceforge.net
-********************************/
+*/
 
+/**
+ * Functions for parsing based on a Stylemap
+ */
 class Parsestyle
 {
     protected ?Stylemap $styleMap = null;

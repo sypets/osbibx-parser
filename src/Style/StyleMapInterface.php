@@ -5,6 +5,7 @@ namespace Sypets\OsbibxParser\Style;
 
 interface StyleMapInterface
 {
+    /** Implementing classes should implement this and call parent AbstractStyleMap::loadMapBasic */
     public function loadMap();
 
     public function getTypes(): array;

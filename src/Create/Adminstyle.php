@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace Sypets\OsbibxParser\Create;
 
 use Sypets\OsbibxParser\Style\Loadstyle;
-use Sypets\OsbibxParser\Style\Parsexml;
+use Sypets\OsbibxParser\Style\ParseStyle\Xml\Parsexml;
 use Sypets\OsbibxParser\Style\Stylemap;
 use Sypets\OsbibxParser\Utf8;
 
