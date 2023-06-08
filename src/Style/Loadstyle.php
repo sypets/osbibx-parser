@@ -17,6 +17,15 @@ so that your improvements can be added to the release package.
 Mark Grimshaw 2005
 http://bibliophile.sourceforge.net
 ********************************/
+
+
+/**
+ * Get styles files from a directly
+ *
+ * Read $stylesDir directory for XML style files and return an associative array. Each XML file should
+ * be within its own folder within $stylesDir.  This folder name should match the first part of the XML file name e.g.
+ * apa/APA.xml or chicago/CHICAGO.xml
+ */
 class Loadstyle
 {
     /**

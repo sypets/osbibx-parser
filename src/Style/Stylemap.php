@@ -32,6 +32,7 @@ class Stylemap extends AbstractStyleMap
     * author. title. publisherName|: publisherLocation|.
     * for a style definition for a book, we know that 'author' is the database field 'creator1', 'title' is
     * the database field 'title' etc.
+     *
     * There are some exceptions as defined by WIKINDX (other systems may have different methods).  Because these may be
     * represented in different ways in different systems, you will need to explicitly define these.  See Bibstyle.php
     * for examples of how WIKINDX does this.  The comments below relate to how WIKINDX stores such values in its database:

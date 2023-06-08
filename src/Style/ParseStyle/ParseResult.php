@@ -2,32 +2,60 @@
 
 namespace Sypets\OsbibxParser\Style\ParseStyle;
 
+/**
+ * XML styles converted into respective array for footnote, bibliography/common etc.
+ * The styles can be converted into a Styles class.
+ */
 class ParseResult implements ParseResultInterface
 {
-    /**
-     * @var array{'info': array<mixed>, 'footnote': array<mixed>, 'common': array<mixed>, 'types': array<mixed>}
-     */
-    protected array $parsedValues = [];
+    protected array $info = [];
+    protected array $bibliographyCommon = [];
+    protected array $types = [];
+    protected array $footnoteCommon = [];
+    protected array $footnoteTypes = [];
+    protected array $citation = [];
+
+    public function __construct(array $info, array $bibliographyCommon, array $types, array $footnoteCommon,
+        array $footnoteTypes, array $citation)
+    {
+        $this->info = $info;
+        $this->bibliographyCommon = $bibliographyCommon;
+        $this->types = $types;
+        $this->footnoteCommon = $footnoteCommon;
+        $this->footnoteTypes = $footnoteTypes;
+        $this->citation = $citation;
+    }
 
     public function getInfoArray(): array
     {
-        return $this->parsedValues['info'] ?? [];
-    }
-    public function getCitationArray(): array
-    {
-        return $this->parsedValues['citation']?? [];
-    }
-    public function getFootnoteArray(): array
-    {
-        return $this->parsedValues['footnote']?? [];
-    }
-    public function getCommonArray(): array
-    {
-        return $this->parsedValues['common']?? [];
+        return $this->info;
     }
 
+    public function getBibliographyCommonArray(): array
+    {
+        return $this->bibliographyCommon;
+    }
+
+    /**
+     * @todo possibly rename to getBibliogrphyTypesArray
+     */
     public function getTypesArray(): array
     {
-        return $this->parsedValues['types']?? [];
+        return $this->types;
+    }
+
+    public function getFootnoteCommonArray(): array
+    {
+        return $this->footnoteCommon;
+    }
+
+    public function getFootnoteTypesArray(): array
+    {
+        return $this->footnoteCommon;
+    }
+
+    public function getCitationArray(): array
+    {
+        return $this->citation;
     }
 }

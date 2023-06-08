@@ -6,8 +6,8 @@ interface ParseResultInterface
 {
     public function getInfoArray(): array;
     public function getCitationArray(): array;
-    public function getFootnoteArray(): array;
-    public function getCommonArray(): array;
+    public function getFootnoteCommonArray(): array;
+    public function getFootnoteTypesArray(): array;
+    public function getBibliographyCommonArray(): array;
     public function getTypesArray(): array;
-
 }

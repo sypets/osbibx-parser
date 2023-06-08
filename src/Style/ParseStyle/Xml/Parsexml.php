@@ -5,7 +5,6 @@ namespace Sypets\OsbibxParser\Style\ParseStyle\Xml;
 
 use Sypets\OsbibxParser\Style\ParseStyle\ParseResult;
 use Sypets\OsbibxParser\Style\ParseStyle\ParseResultInterface;
-use Sypets\OsbibxParser\Style\ParseStyle\Xml\ParseResultRawXml;
 
 /********************************
 * OSBib:
@@ -27,7 +26,17 @@ use Sypets\OsbibxParser\Style\ParseStyle\Xml\ParseResultRawXml;
 
 /**
  * Load style information from XML
- * @todo !!! this only works if the XML file has no line breaks. Fix this!
+ *
+ * If available, we map the following in the XML file:
+ *
+ * .
+ * ├── info         => ParseResult::info
+ * ├── citation     => ParseResult::citation
+ * ├── footnote     => ParseResult::footnoteCommon, ParseResult::footnoteResources
+ * ├── bibliography => ParseResult::types
+ * │   └── common   => ParseResult::bibliographyCommon
+ *
+ * @todo use XPath to parse the XML file
  * @todo define XML schema and use some defaults
  */
 class Parsexml
@@ -43,6 +52,7 @@ class Parsexml
 
     /**
      * Grab a complete XML entry
+     * @deprecated
      */
     public function getEntry(array $entries): void
     {
@@ -57,24 +67,36 @@ class Parsexml
         }
     }
 
+    /**
+     * Grab a complete XML entry
+     */
+    public function parseXmlString(string $xmlString): void
+    {
+            // create root node in node array
+            $this->nodeStack = [];
+            $this->startElement(null, 'ROOT', []);
+            $this->entries[] = $this->parse(trim($xmlString));
+    }
+
     public function extractEntriesFromFile(string $filename): ParseResultInterface
     {
         if (!file_exists($filename)) {
             return new ParseResult();
         }
-        $fh = fopen($filename, 'r');
-        $entries = $this->extractEntries($fh);
-        fclose($fh);
-        return $entries;
+
+        $xmlStr = file_get_contents($filename);
+        $this->parseXmlString($xmlStr);
+        return $this->entriesToParseResult();
     }
 
     /**
+     * !!! does not work properly, use extractEntriesFromFile
      * This method starts the whole process
      * @param resource|bool $fh
      *
-     * @todo make this protected, use extractEntriesFromFile
+     * @deprecated use extractEntriesFromFile
      */
-    public function extractEntries($fh): ParseResultInterface
+    protected function extractEntries($fh): ParseResultInterface
     {
         $this->entries = [];
         $info = [];
@@ -85,13 +107,18 @@ class Parsexml
             if (!$line) {
                 break;
             }
+
+            // this does not work, if there are newlines in the file !!!
+            // that is why we parse the entire file with extractEntriesFromFile
             if (preg_match_all("/<style.*>(.*)<\/style>/Ui", trim($line), $startEntry)) {
                 $this->getEntry($startEntry[1]);
             }
         }
-        if (empty($this->entries)) {
-            $this->entries = false;
-        }
+        return $this->entriesToParseResult();
+    }
+
+    protected function entriesToParseResult(): ParseResultInterface
+    {
         $info['name'] = $this->entries[0]['_ELEMENTS'][0]['_ELEMENTS'][0]['_DATA'];
         $info['description'] = $this->entries[0]['_ELEMENTS'][0]['_ELEMENTS'][1]['_DATA'];
         $info['language'] = $this->entries[0]['_ELEMENTS'][0]['_ELEMENTS'][2]['_DATA'];
@@ -123,15 +150,67 @@ class Parsexml
                 $types[] = $array;
             }
         }
-        $parseResult = new ParseResultRawXml();
-        $parseResult->loadRawValues([
-            'info' => $info,
-            'citation' => $citation,
-            'footnote' => $footnote,
-            'common' => $common,
-            'types' => $types
-        ]);
-        return $parseResult;
+        $footnote = $this->convertFootnoteValuesToArray($footnote);
+        return new ParseResult(
+            //array $info, array $common,  array $types, array $footnote, array $citation
+            $info,
+            $this->convertCommonValuesToArray($common),
+            $types,
+            $footnote['common'],
+            $footnote['types'],
+            $citation
+        );
+    }
+
+    protected function convertCommonValuesToArray(array $common): array
+    {
+        $result = [];
+        foreach ($common as $array) {
+            if (array_key_exists('_NAME', $array) && array_key_exists('_DATA', $array)) {
+                $name = $array['_NAME'];
+                $data = $array['_DATA'];
+                $result[$name] = $data;
+            }
+        }
+        return $result;
+    }
+
+    protected function convertFootnoteValuesToArray(array $footnote): array
+    {
+        $footnoteStyle = [];
+        $footnoteTypes = [];
+        foreach ($footnote as $array) {
+            if (array_key_exists('_NAME', $array) && array_key_exists('_DATA', $array)) {
+                if ($array['_NAME'] != 'resource') {
+                    $footnoteStyle[$array['_NAME']] = $array['_DATA'];
+                } elseif (array_key_exists('_ELEMENTS', $array) && !empty($array['_ELEMENTS'])) {
+                    $footnoteType = $array['_ATTRIBUTES']['name'];
+                    foreach ($array['_ELEMENTS'] as $fArray) {
+                        if ($fArray['_NAME'] == 'ultimate') {
+                            $footnoteTypes[$footnoteType]['ultimate'] = $fArray['_DATA'];
+                            continue;
+                        }
+                        if ($fArray['_NAME'] == 'preliminaryText') {
+                            $footnoteTypes[$footnoteType]['preliminaryText'] = $fArray['_DATA'];
+                            continue;
+                        }
+                        foreach ($fArray['_ELEMENTS'] as $elements) {
+                            if ($fArray['_NAME'] == 'independent') {
+                                $split = mb_split('_', $elements['_NAME']);
+                                $footnoteTypes[$footnoteType][$fArray['_NAME']][$split[1]] = $elements['_DATA'];
+                            } else {
+                                $footnoteTypes[$footnoteType][$fArray['_NAME']][$elements['_NAME']] =
+                                    $elements['_DATA'];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return [
+            'common' => $footnoteStyle,
+            'types' => $footnoteTypes
+        ];
     }
 
     public function parse(string $xmlString='')
