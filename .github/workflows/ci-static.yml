@@ -1,0 +1,32 @@
+name: static CI
+
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron:  '42 5 * * *'
+
+jobs:
+  ci_static:
+    # only run jobs via scheduled workflow in main repo, not in forks
+    if: (github.event_name == 'schedule' && github.repository == 'sypets/osbibx-parser') || (github.event_name != 'schedule')
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: "Checkout"
+        uses: actions/checkout@v2
+
+      - name: "composer validate"
+        run: composer validate
+
+      - name: "composer install"
+        run: composer install
+
+      - name: "php-cs-fixer"
+        run: php vendor/bin/php-cs-fixer fix --dry-run -v --config ./build/php-cs-fixer.php src
+
+      - name: "lint"
+        run: find src -name *.php -print0 | xargs -0 -n1 -P4 php -dxdebug.mode=off -l
+
+      - name: "phpstan"
+        run: vendor/bin/phpstan analyse --no-progress --no-interaction --memory-limit 4G -c build/phpstan.neon
