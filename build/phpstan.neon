@@ -1,0 +1,63 @@
+# phpstan configuration
+#
+# Run phpstan
+# -----------
+#
+# vendor/bin/phpstan analyse --no-progress --no-interaction --memory-limit 4G -c build/phpstan.neon
+#
+# Adding a baseline
+# -----------------
+#
+#  vendor/bin/phpstan analyse --no-progress --no-interaction --memory-limit 4G -c build/phpstan.neon --generate-baseline=build/phpstan-baseline.neon
+#
+# Dealing with mixed arrays
+# -------------------------
+#  Be as specific as possible, e.g. use
+#
+# * `array<string>` etc.
+# * or `array{'foo': int, "bar": string}`
+#
+# If the array is dynamic or cannot be specified, use `mixed[]`
+# see
+#
+# * https://phpstan.org/writing-php-code/phpdoc-types#array-shapes
+# * https://phpstan.org/blog/solving-phpstan-no-value-type-specified-in-iterable-type
+# * https://github.com/phpstan/phpstan/discussions/4375
+
+
+# ----------------------
+
+# basic configuration
+
+includes:
+  #- phpstan-baseline.neon
+
+parameters:
+  tmpDir: ../.cache/phpstan
+  parallel:
+    # Don't be overly greedy on machines with more CPU's to be a good neighbor especially on CI
+    maximumNumberOfProcesses: 5
+  level: 4
+  # check these paths
+  paths:
+    - ../src
+  # use these paths (but do not check)
+  scanDirectories:
+    - ../vendor
+
+  # do not check if array types specified
+  checkMissingIterableValueType: false
+
+  excludePaths:
+    # deprecated classes
+    - ../src/Create/index.php
+    - ../src/Format/Bibstyle.php
+    - ../src/Format/Citeformat.php
+    - ../src/Format/Citestyle.php
+    - ../src/Format/Helpstyle.php
+    - ../src/Format/Testosbib.php
+
+
+
+
+  editorUrl: 'phpstorm://open?file=%%file%%&line=%%line%%'
