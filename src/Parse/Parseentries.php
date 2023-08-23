@@ -190,6 +190,8 @@ class Parseentries
     /**
      * Get a line from bib file
      * @return string|bool
+     *
+     * @todo always return string
      */
     public function getLine()
     {
@@ -494,6 +496,10 @@ class Parseentries
                 }
                 $lastCurrentLine = $this->currentLine;
                 // END: check to guard against endless loop
+
+                if (!$line) {
+                    continue;
+                }
 
                 if (!preg_match('/^@/i', $line)) {
                     continue;

@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## v4.0 - 23.12.2022 -- Sybille Peters
+## v4.0.0 - 21.08.2023 -- Sybille Peters
 
-!!! Minimum supported version is PHP 7.4
+!!! Minimum supported version is PHP 8.1
 
 Major cleanup for PHP 8.1:
 
